@@ -14,6 +14,14 @@ import './assets/css/global.css'
 import axios from 'axios'
 // 定义基本请求路径
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
+axios.interceptors.request.use(config => {
+    let tokenStr = window.sessionStorage.getItem('token')
+    if(!!tokenStr) {
+        config.headers.Authorization = tokenStr
+    }
+    return config
+})
+
 Vue.prototype.$http = axios
 
 

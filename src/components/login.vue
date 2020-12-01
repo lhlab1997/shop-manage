@@ -22,6 +22,7 @@
     </div>
 </template>
 <script>
+import {mapMutations} from 'vuex'
 export default {
     name : 'login',
     data () {
@@ -49,19 +50,27 @@ export default {
         }
     },
     methods: {
-
+        ...mapMutations(["getUserName"]),
         // 提交表单
         submitLoginForm() {
             this.isAvalible = false
             this.$refs.loginForm.validate( async valide =>{
+                this.isAvalible = true
                 //校验不通过
                 if(!valide) return 
+                
                 //通过校验,发起登录请求
                 let {data : res} = await this.$http.post('login',this.loginFormData);
-                this.isAvalible = true
+                
                 if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
+                
+                //将用户信息存储到vuex中
+                this.getUserName(res.data.username)
+
                 //将服务端返回的token存储起来
                 window.sessionStorage.setItem('token',res.data.token)
+                //清除上次登陆时存储的菜单
+                window.sessionStorage.removeItem('activePath')
                 this.$message.success(res.meta.msg)
                 this.$router.push('/home')
             })
