@@ -19,6 +19,7 @@
             <!-- 用户列表 -->
             <el-row class="mbt-20">
                 <el-table :data="userList" style="width: 100%">
+                    <el-table-column label="#" type="index" width="50"></el-table-column>
                     <el-table-column label="用户名" prop="username"></el-table-column>
                     <el-table-column label="电话" prop="mobile"></el-table-column>
                     <el-table-column label="邮箱" prop="email"></el-table-column>
@@ -39,8 +40,8 @@
                             <el-tooltip effect="dark" content="删除" placement="top">
                                 <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteUser(scope.row)"></el-button>
                             </el-tooltip>
-                            <el-tooltip effect="dark" content="分配权限" placement="top">
-                                <el-button type="info" icon="el-icon-s-tools" size="mini"></el-button> 
+                            <el-tooltip effect="dark" content="分配角色" placement="top">
+                                <el-button type="info" icon="el-icon-s-tools" size="mini" @click="allotRole(scope.row)"></el-button> 
                             </el-tooltip>              
                         </template>
                     </el-table-column>
@@ -68,6 +69,7 @@
             title="添加用户"
             :visible.sync="addDialogVisible"
             width="40%"
+            :close-on-click-modal="false"
             :before-close="addDialogClose">
             <el-form ref="addUserForm" :model="addUserInfo"
                                 :hide-required-asterisk="true"
@@ -93,11 +95,12 @@
         </el-dialog>
 
 
-        <!-- 修改用户信息dialog -->
+         <!-- 修改用户信息dialog -->
         <el-dialog
             title="编辑用户"
             :visible.sync="editDialogVisible"
             width="40%"
+            :close-on-click-modal="false"
             :before-close="editDialogClose">
             <el-form ref="editUserForm" :model="editUserInfo"
                                 :hide-required-asterisk="true"
@@ -120,6 +123,39 @@
         </el-dialog>
 
 
+        <!-- 给用户分配角色 -->
+        <el-dialog
+            title="分配角色"
+            :visible.sync="allotDialogVisible"
+            width="40%"
+            :close-on-click-modal="false"
+            :before-close="allotDialogClose">
+            <el-row>
+                <el-col class="mbt-20">
+                    用户名: {{allotRoleInfo.username}}
+                </el-col>
+                <el-col class="mbt-20">
+                    当前角色: {{allotRoleInfo.role_name}}
+                </el-col>
+                <el-col>
+                    分配角色: <el-select v-model="id" 
+                                placeholder="请选择" 
+                                clearable size="small" style="width:130px;"
+                                > {{id}}
+                                <el-option
+                                    v-for="item in roleList"
+                                    :key="item.id"
+                                    :label="item.roleName"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                </el-col>
+            </el-row>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="allotDialogClose">取 消</el-button>
+                <el-button type="primary" @click="saveAllotRoleDialog">确 定</el-button>
+            </span>
+        </el-dialog>
 
     </div>
 </template>
@@ -167,19 +203,19 @@ export default {
             },
             addUserRules : {
                 username: [
-                    { required: true, message: "请输入用户名", trigger: blur },
+                    { required: true, message: "请输入用户名", trigger: 'blur' },
                     { min: 4, max: 10, message: '长度在 4 到 10 个字符', trigger: 'blur' }
                 ],
                 password: [
-                    { required: true, message: "请输入密码", trigger: blur },
+                    { required: true, message: "请输入密码", trigger: 'blur' },
                     { min: 4, max: 16, message: '长度在 4 到 16 个字符', trigger: 'blur' }
                 ],
                 email: [
-                    { required: true, message: "请输入邮箱", trigger: blur },
+                    { required: true, message: "请输入邮箱", trigger: 'blur' },
                     {validator: checkEmail, trigger: 'blur'}
                 ],
                 mobile: [
-                    { required: true, message: "请输入手机", trigger: blur },
+                    { required: true, message: "请输入手机", trigger: 'blur' },
                     {validator: checkMobile, trigger: 'blur'}
                 ]
             },
@@ -201,7 +237,18 @@ export default {
                     { required: true, message: "请输入手机", trigger: blur },
                     {validator: checkMobile, trigger: 'blur'}
                 ]
-            }
+            },
+
+            
+            // 角色列表
+            roleList: [],
+            // 角色id
+            id:'',
+
+            //给用户分配角色
+            allotDialogVisible:false,
+            allotRoleInfo: {}
+
         }
     },
     created() {
@@ -285,6 +332,7 @@ export default {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
                 type: "warning",
+                closeOnClickModal: false
             }).then(async () => {
                 let {data : res} = await this.$http.delete('users/' + info.id)
                 if(res.meta.status !== 200) return this.$message.error("删除用户失败")
@@ -322,7 +370,42 @@ export default {
                 this.getUserList()
             })
         },
-
+        //获取角色列表
+        // async getRoleList() {
+            
+        // }, 
+        //  分配角色按钮
+        async allotRole(info) {
+            if(info.id === 500) return this.$message.error("禁止修改超级管理员的角色")
+            this.allotRoleInfo = info
+            let {data :res} = await this.$http.get('roles')
+            if(res.meta.status !== 200) return this.$message.error("角色列表信息获取失败")
+            this.roleList = res.data
+            this.allotDialogVisible = true
+        },
+        // 分配角儿dialog关闭
+        allotDialogClose() {
+            this.allotRoleInfo = ''
+            this.id = ''
+            this.allotDialogVisible = false
+        },
+        // 保存当前分配的角色
+        async saveAllotRoleDialog(){
+            let {data: res} = await this.$http.put(`users/${this.allotRoleInfo.id}/role`,{
+                rid: this.id
+            })
+            if(res.meta.status !== 200) return this.$message.error("角色分配失败")
+            /* 
+                角色分配成功，提示用户
+                关闭对话框
+                更新用户列表
+            */
+            this.$message.success("角色分配成功")
+            this.allotDialogVisible = false
+            this.getUserList()
+            this.allotRoleInfo = ''
+            this.id = ''
+        },
         // 分页显示条数
         handleSizeChange(size) {
             this.queryInfo.pagesize = size
@@ -337,10 +420,5 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-    .el-card {
-        box-shadow: 0px 2px 2px rgba(0,0,0,.1);;
-    }
-    .mbt-20 {
-        margin-bottom: 20px;
-    }
+    
 </style>
