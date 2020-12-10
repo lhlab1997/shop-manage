@@ -3,6 +3,9 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import './plugins/element.js'
+import ZkTable from 'vue-table-with-tree-grid'
+
+Vue.component('tree-table',ZkTable)
 
 // 引入字体图标文件
 import './assets/fonts/iconfont.css'

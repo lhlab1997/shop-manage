@@ -19,7 +19,11 @@
             <!-- 用户列表 -->
             <el-row class="mbt-20">
                 <el-table :data="userList" style="width: 100%">
-                    <el-table-column label="#" type="index" width="50"></el-table-column>
+                    <el-table-column label="序号" width="50" align="center">
+                        <template slot-scope="scope">
+                            <span v-text="getIndex(scope.$index)"></span>
+                        </template>
+                    </el-table-column>
                     <el-table-column label="用户名" prop="username"></el-table-column>
                     <el-table-column label="电话" prop="mobile"></el-table-column>
                     <el-table-column label="邮箱" prop="email"></el-table-column>
@@ -255,6 +259,9 @@ export default {
         this.getUserList()
     },
     methods: {
+        getIndex($index) {
+            return (this.queryInfo.pagenum -1) * this.queryInfo.pagesize + $index + 1
+        },
         // 获取用户列表
         async getUserList() {
             let {data : res} = await this.$http.get('users', {

@@ -11,3 +11,6 @@ html,body,#app {
 .mbt-20 {
     margin-bottom: 20px;
 }
+.el-cascader-menu {
+    height: 300px;
+}
