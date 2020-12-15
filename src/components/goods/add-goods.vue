@@ -38,7 +38,7 @@
                                     :options="goodsCateList"
                                     :props="selectProps"
                                     @change="selectCateChange">
-                                </el-cascader>{{addGoodsForm.goods_cat}}
+                                </el-cascader>
                             </el-form-item>
                         </el-tab-pane>
                         <el-tab-pane label="商品参数" name="1">
