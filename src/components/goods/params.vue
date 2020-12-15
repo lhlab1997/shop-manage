@@ -259,7 +259,7 @@ export default {
             })
             if(res.meta.status !== 200) return this.$message.error("参数获取失败")
             res.data.forEach(item => {
-                item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : []
+                item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
                 item.inputVisible = false
                 item.inputValue = ''
             })
@@ -361,14 +361,14 @@ export default {
         },
         async handleInputConfirm(row) {
             if(row.inputValue.trim()) {
+                row.attr_vals.push(row.inputValue)
                 let {data: res} = await this.$http.put(`categories/${this.cateId}/attributes/${row.attr_id}`, {
                     attr_name: row.attr_name,
                     attr_sel: this.activeTabs,
-                    attr_vals: row.attr_vals.join(",")
+                    attr_vals: row.attr_vals.join(' ')
                 })
                 if(res.meta.status !== 200) return this.$message.error("添加属性失败")
-                row.attr_vals.push(row.inputValue)
-                this.$message.error("属性添加成功")
+                this.$message.success("属性添加成功")
             }
             row.inputVisible = false
             row.inputValue = ''

@@ -7,6 +7,8 @@ import Rights from '../components/Permissions/rights'
 import Categories from '../components/goods/categories'
 import Params from '../components/goods/params'
 import Goods from '../components/goods/goods'
+import addGoods from '../components/goods/add-goods.vue'
+import Order from '../components/orders/orders.vue'
 
 const routes = [
   {
@@ -57,8 +59,22 @@ const routes = [
       {
         path: '/goods',
         name: 'Goods',
-        component: Goods
-      }
+        component: Goods,
+        children: [
+          
+        ]
+      },
+      
+      {
+        path: '/orders',
+        name: 'Order',
+        component: Order
+      },
+      {
+        path: '/add-goods',
+        name: 'addGoods',
+        component: addGoods
+      },
     ]
   }
 ]
