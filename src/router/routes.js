@@ -9,6 +9,7 @@ import Params from '../components/goods/params'
 import Goods from '../components/goods/goods'
 import addGoods from '../components/goods/add-goods.vue'
 import Order from '../components/orders/orders.vue'
+import Reports from '../components/reports/reports.vue'
 
 const routes = [
   {
@@ -74,6 +75,11 @@ const routes = [
         path: '/add-goods',
         name: 'addGoods',
         component: addGoods
+      },
+      {
+        path: '/reports',
+        name: 'reports',
+        component: Reports
       },
     ]
   }
